@@ -12,7 +12,6 @@ import ru.practicum.scooter.api.model.CourierCredentials;
 import ru.practicum.scooter.api.model.CreateCourierResponse;
 
 import static org.apache.http.HttpStatus.SC_CREATED;
-import static org.apache.http.HttpStatus.SC_OK;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static org.apache.http.HttpStatus.SC_CONFLICT;
 import static org.junit.Assert.assertEquals;
@@ -31,7 +30,10 @@ public class CourierCreationTest {
 
     @After
     public void clear() {
-        if (courierId != 0) {
+        if (!(courier.getLogin().isEmpty()) && !(courier.getPassword().isEmpty())) {
+            CourierCredentials courierCredentials = new CourierCredentials(courier.getLogin(), courier.getPassword());
+            Response responseLogin = courierApi.loginCourier(courierCredentials);
+            courierId = responseLogin.body().jsonPath().getInt("id");
             courierApi.deleteCourier(courierId);
         }
     }
@@ -41,15 +43,9 @@ public class CourierCreationTest {
     @Description("Создание курьера с корректными данными, проверка статус-кода и id курьера")
     public void courierCreationWithValidData() {
         Response responseCreate = courierApi.createCourier(courier);
-
         assertEquals(SC_CREATED, responseCreate.statusCode());
         CreateCourierResponse createCourierResponse = responseCreate.as(CreateCourierResponse.class);
         assertTrue(createCourierResponse.ok);
-
-        CourierCredentials courierCredentials = new CourierCredentials(courier.getLogin(), courier.getPassword());
-        Response responseLogin = courierApi.loginCourier(courierCredentials);
-        assertEquals(SC_OK, responseLogin.statusCode());
-        courierId = responseLogin.body().jsonPath().getInt("id");
     }
 
     @Test
@@ -58,7 +54,6 @@ public class CourierCreationTest {
     public void courierCreationWithoutLogin() {
         courier.setLogin("");
         Response responseCreate = courierApi.createCourier(courier);
-
         assertEquals(SC_BAD_REQUEST, responseCreate.statusCode());
         CreateCourierResponse createCourierResponse = responseCreate.as(CreateCourierResponse.class);
         assertEquals(createCourierResponse.getBadRequestMessage(), createCourierResponse.message);
@@ -70,7 +65,6 @@ public class CourierCreationTest {
     public void courierCreationWithoutPassword() {
         courier.setPassword("");
         Response responseCreate = courierApi.createCourier(courier);
-
         assertEquals(SC_BAD_REQUEST, responseCreate.statusCode());
         CreateCourierResponse createCourierResponse = responseCreate.as(CreateCourierResponse.class);
         assertEquals(createCourierResponse.getBadRequestMessage(), createCourierResponse.message);
@@ -82,14 +76,8 @@ public class CourierCreationTest {
     public void courierCreationWithExistingLogin() {
         courierApi.createCourier(courier);
         Response responseExistingLogin = courierApi.createCourier(courier);
-
-        CourierCredentials courierCredentials = new CourierCredentials(courier.getLogin(), courier.getPassword());
-        Response responseLogin = courierApi.loginCourier(courierCredentials);
-        courierId = responseLogin.body().jsonPath().getInt("id");
-
         assertEquals(SC_CONFLICT, responseExistingLogin.statusCode());
         CreateCourierResponse createCourierResponse = responseExistingLogin.as(CreateCourierResponse.class);
         assertEquals(createCourierResponse.getConflictMessage(), createCourierResponse.message);
     }
-
 }

@@ -3,7 +3,6 @@ package ru.practicum.scooter;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import jdk.jfr.Description;
-import org.hamcrest.MatcherAssert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +15,6 @@ import static org.apache.http.HttpStatus.SC_OK;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.notNullValue;
 
 public class CourierLoginTest {
     private int courierId;
@@ -47,7 +45,7 @@ public class CourierLoginTest {
         assertEquals(SC_OK, responseLogin.statusCode());
         LoginCourierResponse loginCourierResponse = responseLogin.as(LoginCourierResponse.class);
         courierId = loginCourierResponse.getId();
-        MatcherAssert.assertThat(courierId, notNullValue());
+        assertNotNull(courierId);
     }
 
     @Test

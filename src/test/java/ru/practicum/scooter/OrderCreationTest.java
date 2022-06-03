@@ -3,7 +3,6 @@ package ru.practicum.scooter;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
-import org.hamcrest.MatcherAssert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,12 +13,12 @@ import ru.practicum.scooter.api.model.CreateOrderResponse;
 
 import static org.apache.http.HttpStatus.SC_CREATED;
 import static org.junit.Assert.assertEquals;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertNotNull;
+
 
 @RunWith(Parameterized.class)
 public class OrderCreationTest {
 
-    private int orderId;
     private static OrderApi orderApi;
     private static Order order;
     private int track;
@@ -55,7 +54,6 @@ public class OrderCreationTest {
         assertEquals(SC_CREATED, responseOrderCreate.statusCode());
         CreateOrderResponse createOrderResponse = responseOrderCreate.as(CreateOrderResponse.class);
         track = createOrderResponse.getTrack();
-        MatcherAssert.assertThat(track, notNullValue());
-        orderId = orderApi.getOrderByTrack(track);
+        assertNotNull(track);
     }
 }
